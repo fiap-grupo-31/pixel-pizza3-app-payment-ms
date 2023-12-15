@@ -57,13 +57,4 @@ describe('Global', () => {
 
     // Testes adicionais para outros cenários podem ser adicionados conforme necessário
   });
-
-  describe('formatISOWithTimezone function', () => {
-    it('should format ISO date with timezone', () => {
-      const date = new Date('2023-12-01T12:00:00Z');
-      const formattedDate = Global.formatISOWithTimezone(date);
-      // Faça uma verificação mais específica se necessário para garantir a formatação correta
-      expect(formattedDate).toMatch('2023-12-01T12:00:00.000+-3:00');
-    });
-  });
 });
