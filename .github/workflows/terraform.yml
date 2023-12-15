@@ -11,7 +11,7 @@ on:
 
 env: 
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: fiap-pixels
+  ECR_REPOSITORY: fiap-pixels-payment
   SHORT_SHA: $(echo ${{ github.sha }} | cut -c 1-8)
 
 jobs:
