@@ -25,10 +25,6 @@ jobs:
       run: |
         npm install
 
-    - name: Gera versão de distribuição
-      run: |
-        npm run build
-
     - name: Executa teste da aplicação
       run: |
         npm test
