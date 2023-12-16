@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest",
+    "test": "jest --coverage",
     "build": "rimraf dist/ && tsc && cp src/SimulationPage.html dist/ && cp global-bundle.pem dist/",
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts"
   },

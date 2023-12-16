@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-app-payment-deployment
+  labels: 
+    app: "fiap-app-payment-deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fiap-app-payment-pod
+  template:
+    metadata:
+      labels:
+        app: fiap-app-payment-pod
+    spec:
+      containers:
+        - name: fiap-app-payment
+          image: ENDPOINT_ECR:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: pixels-payment-config-map

@@ -27,10 +27,10 @@ class Payments extends Model<Payments> {
   })
     amount!: number;
 
-  @Default(DataType.NOW) // Define o valor padrão como a data atual no momento da criação do registro
+  @Default(DataType.NOW)
   @Column({
     type: DataType.DATE,
-    allowNull: false,
+    allowNull: false
   })
     createdAt!: Date;
 

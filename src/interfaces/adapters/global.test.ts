@@ -15,8 +15,6 @@ describe('Global', () => {
       expect(response.status).toBe('error');
       expect(response.message).toBe('Not found');
     });
-
-    // Testes adicionais para outros cenários podem ser adicionados conforme necessário
   });
 
   describe('success function', () => {
@@ -33,8 +31,6 @@ describe('Global', () => {
       expect(response.status).toBe('success');
       expect(response.data).toEqual({ key: 'value' });
     });
-
-    // Testes adicionais para outros cenários podem ser adicionados conforme necessário
   });
 
   describe('convertToObject function', () => {
@@ -54,7 +50,5 @@ describe('Global', () => {
       const response: any = Global.convertToObject(invalidData);
       expect(response).toEqual({});
     });
-
-    // Testes adicionais para outros cenários podem ser adicionados conforme necessário
   });
 });

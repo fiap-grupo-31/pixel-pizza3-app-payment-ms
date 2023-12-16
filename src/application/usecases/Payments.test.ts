@@ -31,20 +31,17 @@ describe('PaymentsUseCases', () => {
   // Teste para getPaymentsAll
   it('should get all payments', async () => {
     mockPaymentsGateway.findAll.mockResolvedValueOnce([
-      /* mock data */
     ]);
 
     const result = await PaymentsUseCases.getPaymentsAll(mockPaymentsGateway);
     expect(mockPaymentsGateway.findAll).toHaveBeenCalled();
     expect(result).toEqual([
-      /* mock data */
     ]);
   });
 
-  // Teste para getPaymentsByReference
-  it('should get payments by reference', async () => {
+  // Teste para getPaymentsByReference Vazia
+  it('should get payments by reference void', async () => {
     mockPaymentsGateway.find.mockResolvedValueOnce([
-      /* mock data */
     ]);
 
     const result = await PaymentsUseCases.getPaymentsByReference(
@@ -53,14 +50,29 @@ describe('PaymentsUseCases', () => {
     );
     expect(mockPaymentsGateway.find).toHaveBeenCalledWith({});
     expect(result).toEqual([
-      /* mock data */
     ]);
+  });
+
+  // Teste para getPaymentsByReference com conteúdo
+  it('should get payments by reference', async () => {
+    mockPaymentsGateway.find.mockResolvedValueOnce([
+    ]);
+
+    const result = await PaymentsUseCases.getPaymentsByReference(
+      {
+        id: 1
+      },
+      mockPaymentsGateway
+    );
+    expect(mockPaymentsGateway.find).toHaveBeenCalledWith({
+      id: 1
+    });
+    expect(result).toEqual([]);
   });
 
   // Teste para getPaymentsById
   it('should get payment by ID', async () => {
     const mockPayment = {
-      /* mock data */
     };
     mockPaymentsGateway.findId.mockResolvedValueOnce(mockPayment);
 

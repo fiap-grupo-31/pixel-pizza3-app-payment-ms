@@ -13,9 +13,6 @@ const getSchemas = (key: string): any => {
     case 'payments':
       models = Payments;
       break;
-    case 'paymentss':
-      // models = mongoose.model('Payments', paymentsSchema);
-      break;
   }
   return models;
 };

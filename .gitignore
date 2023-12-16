@@ -237,3 +237,4 @@ dist/
 
 k8s/configmap.yaml
 mysql/*
+.scannerwork/*
