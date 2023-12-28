@@ -31,7 +31,7 @@ export class FastfoodApp {
       }
     });
 
-    const port = process.env.PORT || 8080;
+    const port = process.env.PORT ?? 8080;
 
     this._app.get('/swagger.json', (req: Request, res: Response) => {
       res.setHeader('Content-Type', 'application/json');
@@ -217,6 +217,85 @@ export class FastfoodApp {
 
     /**
         * @swagger
+        * /payment/order/:id:
+        *   get:
+        *     summary: retorna pedido de pagamento por ID
+        *     tags:
+        *       - Payment
+        *     parameters:
+        *       - in: path
+        *         name: id
+        *         required: true
+        *         schema:
+        *           type: string
+        *         description: id do pedido de pagamento
+        *     responses:
+        *       200:
+        *         description: Successful response
+        *         content:
+        *           application/json:
+        *             schema:
+        *               type: object
+        *               properties:
+        *                 status:
+        *                   type: string
+        *                 data:
+        *                   type: array
+        *                   items:
+        *                     type: object
+        *                     properties:
+        *                       _id:
+        *                         type: string
+        *                       _protocol:
+        *                         type: number
+        *                       _customerId:
+        *                         type: string
+        *                       _status:
+        *                         type: string
+        *                       _payment:
+        *                         type: string
+        *                       _itens:
+        *                          type: array
+        *                          items:
+        *                            type: object
+        *                            properties:
+        *                              _id:
+        *                                type: string
+        *                              _orderId:
+        *                                type: number
+        *                              _productId:
+        *                                type: string
+        *                              _price:
+        *                                type: number
+        *                              _quantity:
+        *                                type: number
+        *                              _obs:
+        *                                type: string
+        *       404:
+        *         description: Products not found
+        *         content:
+        *           application/json:
+        *             schema:
+        *               type: object
+        *               properties:
+        *                 status:
+        *                   type: string
+        *                 message:
+        *                   type: string
+        */
+    this._app.get('/payment/order/:id', async (req: Request, res: Response) => {
+      res.setHeader('Content-type', 'application/json');
+      const { id } = req.params;
+
+      const products = await PaymentsController.getPaymentsByOrderId(
+        id,
+        this._dbconnection
+      );
+      res.send(products);
+    });
+
+    /**
+        * @swagger
         * /payment:
         *   post:
         *     summary: Efetua pedido de pagamento para o broker
@@ -284,7 +363,7 @@ export class FastfoodApp {
         description,
         quantity,
         amount,
-        `${req.protocol}://${req.get('host')}`,
+        process.env.API_PAYMENT_BASEURL ?? '',
         this._dbconnection
       );
       res.send(payment);

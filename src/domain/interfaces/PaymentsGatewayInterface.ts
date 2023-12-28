@@ -3,7 +3,7 @@ import { type Payments } from 'src/domain/entities/Payments';
 interface PaymentsGatewayInterface {
   findId: (id: bigint) => Promise<Payments | null>
   find: (Reference: Record<string, any>) => Promise<Payments[] | null>
-  findAll: () => Promise<Payments[] | null>
+  findAll: (Reference: Record<string, any>) => Promise<Payments[] | null>
   persist: (
     orderId: string,
     broker: string,

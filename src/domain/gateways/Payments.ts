@@ -56,8 +56,8 @@ export class PaymentsGateway implements PaymentsGatewayInterface {
     }
   }
 
-  async findAll (): Promise<Payments[] | null> {
-    const result = await this.repositorioDados.findAll(this.schema);
+  async findAll (reference: Record<string, any> | {}): Promise<Payments[] | null> {
+    const result = await this.repositorioDados.findAll(this.schema, reference);
 
     if (result === null) {
       return null;

@@ -39,8 +39,14 @@ export class MysqldbConnection implements DbConnection {
 
     sequelize
       .authenticate()
-      .then(() => {
+      .then(async () => {
         sequelize.addModels([Payments]);
+        try {
+          await sequelize.sync({ force: false });
+          console.log('Tabelas sincronizadas com sucesso!');
+        } catch (error) {
+          console.error('Erro ao sincronizar tabelas:', error);
+        }
 
         console.log('Conexão bem-sucedida com o banco de dados.');
       })
@@ -63,9 +69,9 @@ export class MysqldbConnection implements DbConnection {
     return rows;
   }
 
-  async findAll (Schema: string): Promise<any[]> {
+  async findAll (Schema: string, Reference: Record<string, any>): Promise<any[]> {
     const model = getSchemas(Schema);
-    const rows = await model.findAll();
+    const rows = await model.findAll(Reference);
 
     return rows;
   }

@@ -2,6 +2,7 @@ import {
   PaymentsGateway,
   PaymentsMercadoPagoGateway
 } from '../../domain/gateways';
+import { OrderApiAdapter } from '../adapters/OrderApiAdapter'
 import { AxiosHttpClient } from '../../infrastructure/external/http/axios-client';
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
 import { QRCodeGeneratorAdapter } from '../../infrastructure/external/qrcode/qrcode';
@@ -69,6 +70,36 @@ export class PaymentsController {
       });
 
     return JSON.stringify(allPayments);
+  }
+
+  /**
+   * Retorna pagamento por order id
+   *
+   * @static
+   * @param {string} id
+   * @param {DbConnection} dbconnection
+   * @return {*}  {Promise<string>}
+   * @memberof PaymentsController
+   */
+  static async getPaymentsByOrderId (
+    orderId: string,
+    dbconnection: DbConnection
+  ): Promise<string> {
+    const paymentsGateway = new PaymentsGateway(dbconnection);
+    const payment = await PaymentsUseCases.getPaymentsByReference({
+      where: {
+        orderId
+      }
+    }, paymentsGateway)
+      .then((data) => {
+        return Global.success(data);
+      })
+      .catch((err) => {
+        return Global.error(err);
+      });
+
+    const adapted = JSON.stringify(payment);
+    return adapted;
   }
 
   /**
@@ -140,7 +171,7 @@ export class PaymentsController {
       paymentsGateway
     )
       .then((data) => {
-        const paymentConvert = Global.convertToObject(data);
+        const paymentConvert = Global.convertToObject(JSON.stringify(data));
         paymentId = paymentConvert._id;
         webhook = `${dnsPublic}/payment/webhook/${broker}/${paymentConvert._id}`;
         paymentConvert._webhook = webhook;
@@ -254,12 +285,14 @@ export class PaymentsController {
         return err;
       });
 
+    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '');
     const order = await PaymentsUseCases.updatePayment(
       id,
       orderId ?? paymentGet?._orderId,
       broker ?? paymentGet?._broker,
       status,
       description ?? paymentGet?._description,
+      orderApiAdapter,
       paymentsGateway
     )
       .then((data) => {
@@ -305,12 +338,14 @@ export class PaymentsController {
         return err;
       });
 
+    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '');
     const order = await PaymentsUseCases.updatePayment(
       paymentGet?._id,
       paymentGet?._orderId,
       paymentGet?._broker,
       status,
       description ?? paymentGet?._description,
+      orderApiAdapter,
       paymentsGateway
     )
       .then((data) => {
