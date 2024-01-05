@@ -51,6 +51,21 @@ export class MysqldbConnection implements DbConnection {
         console.log('Conexão bem-sucedida com o banco de dados.');
       })
       .catch((err: any) => {
+        sequelize = new Sequelize({
+          username: MYSQL_DB_USER,
+          password: MYSQL_DB_PASS,
+          dialect: 'mysql',
+          host: MYSQL_DB_HOST,
+          port: parseInt(MYSQL_DB_PORT ?? '3306')
+        });
+
+        sequelize.query(`CREATE DATABASE IF NOT EXISTS ${MYSQL_DB_DATABASE};`).then(() => {
+          console.log('Banco de dados criado ou já existente.');
+          process.exit(1);
+        }).catch((err: any) => {
+          console.error('Erro ao criar o banco de dados:', err);
+        });
+
         console.error('Erro ao conectar-se ao banco de dados:', err);
       });
   }
