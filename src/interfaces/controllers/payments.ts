@@ -159,8 +159,8 @@ export class PaymentsController {
     const paymentsGateway = new PaymentsGateway(dbconnection);
     const payment = 'WAITING';
 
-    let paymentId: String | any;
-    let webhook: String | any;
+    let paymentId: any;
+    let webhook: any;
     let paymentObject = await PaymentsUseCases.setPayment(
       orderId,
       broker,
@@ -186,7 +186,7 @@ export class PaymentsController {
         new AxiosHttpClient('')
       );
 
-      const webhookMeli: String = `${
+      const webhookMeli: string = `${
         process.env.MELI_WEBHOOK
           ? `${process.env.MELI_WEBHOOK}/payment/webhook/mercadopago/${paymentId}`
           : `${dnsPublic}/payment/webhook/mercadopago/${paymentId}`

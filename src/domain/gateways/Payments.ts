@@ -150,7 +150,7 @@ export class PaymentsGateway implements PaymentsGatewayInterface {
     return success;
   }
 
-  async remove (id: bigint): Promise<any | null> {
+  async remove (id: bigint): Promise<any> {
     const result = await this.repositorioDados.remove(this.schema, id);
 
     return result;

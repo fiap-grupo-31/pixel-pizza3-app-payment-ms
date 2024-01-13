@@ -18,8 +18,8 @@ export class Payments {
     description: string,
     quantity: number,
     amount: number,
-    created_at: Date | any,
-    updated_at: Date | any
+    created_at: any,
+    updated_at: any
   ) {
     this._id = id;
     this._orderId = orderId || '';

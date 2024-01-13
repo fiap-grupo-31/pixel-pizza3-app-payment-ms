@@ -5,7 +5,7 @@ export class PaymentsMercadoPagoGateway
 implements PaymentsMercadoPagoInterface {
   constructor (private readonly httpClient: HttpClient) {}
 
-  async createPayment (data: Object | any): Promise<any> {
+  async createPayment (data: any): Promise<any> {
     try {
       const response = await this.httpClient.post(
         `https://api.mercadopago.com/instore/orders/qr/seller/collectors/${process.env.MELI_USER_ID}/pos/${process.env.MELI_POSID}/qrs`,

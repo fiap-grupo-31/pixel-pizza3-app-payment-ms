@@ -79,7 +79,9 @@ class PaymentsUseCases {
       null,
       null
     );
-    if (!entity.paymentCheck) return await Promise.reject('payment inválid');
+    if (!entity.paymentCheck) {
+      throw new Error('payment inválid');
+    }
 
     try {
       await paymentsGateway.update(
