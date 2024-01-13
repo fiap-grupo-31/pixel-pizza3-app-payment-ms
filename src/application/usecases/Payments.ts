@@ -55,7 +55,7 @@ class PaymentsUseCases {
         payments?.dataValues.updated_at
       );
     } catch (error) {
-      return await Promise.reject('failure insert');
+      throw new Error('failure insert');
     }
   }
 
@@ -105,7 +105,7 @@ class PaymentsUseCases {
         payments?.updated_at ?? ''
       );
     } catch (error) {
-      return await Promise.reject('failure update');
+      throw new Error('failure update');
     }
   }
 }

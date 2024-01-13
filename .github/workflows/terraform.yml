@@ -29,28 +29,38 @@ jobs:
       run: |
         npm run test
 
-  #run-sonarqube:
-  #  runs-on: ubuntu-latest
-  #  needs:
-  #    - run-tests
-#
-  #  steps:
-  #    - name: Checkout do repositório
-  #      uses: actions/checkout@v2
-#
-  #    - name: SonarQube Scan
-  #    - uses: sonarsource/sonarqube-scan-action@master
-  #      continue-on-error: false
-  #      env:
-  #        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  run-sonarqube:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    needs:
+      - run-tests
+
+    steps:
+    - name: Checkout do repositório
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      continue-on-error: false
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    - name: Valida Quality Gate status do SonarQube
+      run: |
+        if [ "$(curl -s -u ${{ secrets.SONAR_TOKEN }}: ${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=pixel-pizza3-app-payment-ms | jq -r '.projectStatus.status')" != "OK" ]; then
+          echo "Quality Gate failed. Exiting with non-zero status."
+          exit 1
+        fi
     
   build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     needs:
       - run-tests
-      # - run-sonar
+      - run-sonarqube
 
     steps:
     - name: Checkout do repositório
