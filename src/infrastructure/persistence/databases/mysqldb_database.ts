@@ -9,14 +9,7 @@ import {
 let sequelize: any = null;
 const getSchemas = (key: string): any => {
   let models: any = null;
-  switch (key) {
-    case 'payments':
-      models = Payments;
-      break;
-    default:
-      models = Payments;
-      break;
-  }
+  models = Payments;
   return models;
 };
 
