@@ -7,10 +7,12 @@ export interface OrderApiAdapterInterface {
 export class OrderApiAdapter implements OrderApiAdapterInterface {
   private readonly axiosInstance: AxiosInstance;
 
-  constructor (baseURL: string) {
-    this.axiosInstance = axios.create({
-      baseURL
-    });
+  constructor (baseURL: string, instance: any) {
+    this.axiosInstance = (!instance
+      ? axios.create({
+        baseURL
+      })
+      : instance);
   }
 
   async updatePaymentOrder (orderId: string, payment: string): Promise<boolean> {
@@ -25,7 +27,6 @@ export class OrderApiAdapter implements OrderApiAdapterInterface {
 
       return true;
     } catch (error) {
-      console.log(error)
       return false;
     }
   }

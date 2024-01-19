@@ -1,54 +1,65 @@
 import { Global } from './global';
 
 describe('Global', () => {
-  describe('error function', () => {
-    it('should return a success response: any with statusCode 200 when data is null', () => {
-      const response: any = Global.error(null);
-      expect(response.statusCode).toBe(200);
-      expect(response.status).toBe('success');
-      expect(response.data).toEqual([]);
-    });
-
-    it('should return an error response: any with statusCode 404 when data is provided', () => {
-      const response: any = Global.error('Not found');
-      expect(response.statusCode).toBe(404);
-      expect(response.status).toBe('error');
-      expect(response.message).toBe('Not found');
+  it('Deve retornar um objeto de erro com statusCode padrão se nenhum dado for fornecido', () => {
+    const errorResult = Global.error(null);
+    expect(errorResult).toEqual({
+      statusCode: 200,
+      status: 'success',
+      data: []
     });
   });
 
-  describe('success function', () => {
-    it('should return a success response: any with statusCode 200 when data is null', () => {
-      const response: any = Global.success(null);
-      expect(response.statusCode).toBe(200);
-      expect(response.status).toBe('success');
-      expect(response.data).toEqual([]);
-    });
-
-    it('should return a success response: any with statusCode 200 when data is provided', () => {
-      const response: any = Global.success({ key: 'value' });
-      expect(response.statusCode).toBe(200);
-      expect(response.status).toBe('success');
-      expect(response.data).toEqual({ key: 'value' });
+  it('Deve retornar um objeto de erro com statusCode e mensagem especificados', () => {
+    const errorMessage = 'Not found';
+    const errorResult = Global.error(errorMessage, 404);
+    expect(errorResult).toEqual({
+      statusCode: 404,
+      status: 'error',
+      message: errorMessage
     });
   });
 
-  describe('convertToObject function', () => {
-    it('should return an empty object when data is null', () => {
-      const response: any = Global.convertToObject(null);
-      expect(response).toEqual({});
+  it('Deve retornar um objeto de sucesso padrão se nenhum dado for fornecido', () => {
+    const successResult = Global.success(null);
+    expect(successResult).toEqual({
+      statusCode: 200,
+      status: 'success',
+      data: []
     });
+  });
 
-    it('should parse JSON string data into an object', () => {
-      const jsonData = '{"key": "value"}';
-      const response: any = Global.convertToObject(jsonData);
-      expect(response).toEqual({ key: 'value' });
+  it('Deve retornar um objeto de sucesso com os dados fornecidos', () => {
+    const data = { key: 'value' };
+    const successResult = Global.success(data);
+    expect(successResult).toEqual({
+      statusCode: 200,
+      status: 'success',
+      data
     });
+  });
 
-    it('should return an empty object when parsing fails', () => {
-      const invalidData = 'invalidJSON';
-      const response: any = Global.convertToObject(invalidData);
-      expect(response).toEqual({});
-    });
+  it('Deve converter dados para objeto corretamente', () => {
+    const jsonData = '{"key": "value"}';
+    const convertedData = Global.convertToObject(jsonData);
+    expect(convertedData).toEqual({ key: 'value' });
+  });
+
+  it('Deve retornar um objeto vazio para dados inválidos na conversão', () => {
+    const invalidData = 'invalidJSON';
+    const convertedData = Global.convertToObject(invalidData);
+    expect(convertedData).toEqual({});
+  });
+
+  it('Deve retornar um objeto vazio para dado null na conversão', () => {
+    const invalidData = null;
+    const convertedData = Global.convertToObject(invalidData);
+    expect(convertedData).toEqual({});
+  });
+
+  it('Deve formatar a data com o fuso horário correto', () => {
+    const date = new Date('2023-12-26T12:00:00Z');
+    const formattedDate = Global.formatISOWithTimezone(date);
+    expect(formattedDate).toMatch('2023-12-26T12:00:00.000+-3:00');
   });
 });

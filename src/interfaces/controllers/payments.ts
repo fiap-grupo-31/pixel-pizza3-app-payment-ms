@@ -268,7 +268,7 @@ export class PaymentsController {
   ): Promise<string> {
     const paymentsGateway = new PaymentsGateway(dbconnection);
     if (!id) return JSON.stringify(Global.error('id invalid'));
-    if (!status) return JSON.stringify(Global.error('status invalid'));
+    if (status === '') return JSON.stringify(Global.error('status invalid'));
 
     if (status === 'payment.created') {
       status = 'APPROVED';
@@ -285,7 +285,7 @@ export class PaymentsController {
         return err;
       });
 
-    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '');
+    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
       id,
       orderId ?? paymentGet?._orderId,
@@ -338,7 +338,7 @@ export class PaymentsController {
         return err;
       });
 
-    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '');
+    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
       paymentGet?._id,
       paymentGet?._orderId,
