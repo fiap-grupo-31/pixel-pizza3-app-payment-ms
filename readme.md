@@ -32,6 +32,16 @@ Consiste no microserviço de um sistema de gestão de pedidos para processamento
 
 - npm run test
 
+![Alt text](test.png)
+
+Coverage
+
+![Alt text](coverage.png)
+
+## Execução dos testes unitários
+
+- npm run test
+
 ## Gerar a versão de distribuição /dist ( se necessário )
 
 Executar o comando abaixo para gerar automaticamente o dist
