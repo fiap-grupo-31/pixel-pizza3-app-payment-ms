@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { PaymentsController } from '../controllers/payments';
 
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
-import express, { type Request, type Response } from 'express';
+import express, { type Request, type RequestHandler, type Response } from 'express';
 import bodyParser from 'body-parser';
 
 import { Global } from '../adapters';
 import { swaggerSpec } from '../../infrastructure/swagger/swagger';
-import path from 'path';
 
 export class FastfoodApp {
   private readonly _dbconnection: DbConnection;
-  private readonly _app = express();
+  public readonly _app = express();
+  private server: any = null;
 
   constructor (dbconnection: DbConnection) {
     this._dbconnection = dbconnection;
@@ -42,30 +41,6 @@ export class FastfoodApp {
     const swaggerUi = require('swagger-ui-express');
     this._app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-    this.routes();
-    const server = this._app.listen(port, () => {
-      console.log(`Fiap app listening on port ${port}`);
-      if (process.env.CI) {
-        process.exit(0)
-      }
-    });
-    server.keepAliveTimeout = 30 * 1000;
-    server.headersTimeout = 35 * 1000;
-  }
-
-  routes (): void {
-    this.routesPayment();
-  }
-
-  routesApp (): void {
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    this._app.get('/', async (_req: Request, res: Response) => {
-      const filePath = path.join(path.resolve(__dirname, '../../'), 'SimulationPage.html');
-      res.sendFile(filePath);
-    });
-  }
-
-  routesPayment (): void {
     /**
         * @swagger
         * /payment:
@@ -127,14 +102,14 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.get('/payment', async (req: Request, res: Response) => {
+    this._app.get('/payment', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
 
       const products = await PaymentsController.getPayments(
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
         * @swagger
@@ -204,7 +179,7 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.get('/payment/:id', async (req: Request, res: Response) => {
+    this._app.get('/payment/:id', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -213,7 +188,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
         * @swagger
@@ -283,7 +258,7 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.get('/payment/order/:id', async (req: Request, res: Response) => {
+    this._app.get('/payment/order/:id', (async (req: Request, res: Response) => {
       res.setHeader('Content-type', 'application/json');
       const { id } = req.params;
 
@@ -292,7 +267,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(products);
-    });
+    }) as RequestHandler);
 
     /**
         * @swagger
@@ -353,7 +328,7 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.post('/payment', async (req: Request, res: Response) => {
+    this._app.post('/payment', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { broker, orderId, description, quantity, amount } = req.body;
       const payment = await PaymentsController.setPayment(
@@ -367,7 +342,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(payment);
-    });
+    }) as RequestHandler);
 
     /**
         * @swagger
@@ -429,7 +404,7 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.post('/payment/webhook/fake/:paymentId', async (req: Request, res: Response) => {
+    this._app.post('/payment/webhook/fake/:paymentId', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { paymentId } = req.params;
       const { status, description } = req.body;
@@ -442,7 +417,7 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(payment);
-    });
+    }) as RequestHandler);
 
     /**
         * @swagger
@@ -506,7 +481,7 @@ export class FastfoodApp {
         *                 message:
         *                   type: string
         */
-    this._app.post('/payment/webhook/mercadopago/:paymentId', async (req: Request, res: Response) => {
+    this._app.post('/payment/webhook/mercadopago/:paymentId', (async (req: Request, res: Response): Promise<void> => {
       res.setHeader('Content-type', 'application/json');
       const { paymentId } = req.params;
       const { action, id } = req.body;
@@ -519,6 +494,15 @@ export class FastfoodApp {
         this._dbconnection
       );
       res.send(payment);
+    }) as RequestHandler);
+
+    this.server = this._app.listen(port, () => {
     });
+    this.server.keepAliveTimeout = 30 * 1000;
+    this.server.headersTimeout = 35 * 1000;
+  }
+
+  stop (): void {
+    this.server.close();
   }
 }

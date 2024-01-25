@@ -91,20 +91,20 @@ class PaymentsUseCases {
         payment,
         description
       );
-      const payments = await paymentsGateway.findId(id);
+      const payments: any = await paymentsGateway.findId(id);
 
-      await orderApiAdapter.updatePaymentOrder(payments?.orderId ?? '', payment)
+      await orderApiAdapter.updatePaymentOrder(payments?.orderId, payment)
 
       return new Payments(
         payments?.id,
-        payments?.orderId ?? '',
-        payments?.broker ?? '',
-        payments?.payment ?? '',
-        payments?.description ?? '',
+        payments?.orderId,
+        payments?.broker,
+        payments?.payment,
+        payments?.description,
         payments?.quantity ?? 0,
         payments?.amount ?? 0,
-        payments?.created_at ?? '',
-        payments?.updated_at ?? ''
+        payments?.created_at,
+        payments?.updated_at
       );
     } catch (error) {
       throw new Error('failure update');

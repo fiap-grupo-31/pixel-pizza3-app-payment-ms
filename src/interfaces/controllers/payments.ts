@@ -267,7 +267,6 @@ export class PaymentsController {
     dbconnection: DbConnection
   ): Promise<string> {
     const paymentsGateway = new PaymentsGateway(dbconnection);
-    if (!id) return JSON.stringify(Global.error('id invalid'));
     if (status === '') return JSON.stringify(Global.error('status invalid'));
 
     if (status === 'payment.created') {
@@ -288,10 +287,10 @@ export class PaymentsController {
     const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
       id,
-      orderId ?? paymentGet?._orderId,
-      broker ?? paymentGet?._broker,
+      orderId ?? paymentGet._orderId,
+      broker ?? paymentGet._broker,
       status,
-      description ?? paymentGet?._description,
+      description ?? paymentGet._description,
       orderApiAdapter,
       paymentsGateway
     )
@@ -340,9 +339,9 @@ export class PaymentsController {
 
     const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
-      paymentGet?._id,
-      paymentGet?._orderId,
-      paymentGet?._broker,
+      paymentGet._id,
+      paymentGet._orderId,
+      paymentGet._broker,
       status,
       description ?? paymentGet?._description,
       orderApiAdapter,
