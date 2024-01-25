@@ -90,6 +90,17 @@ describe('PaymentsController', () => {
       expect(result).toEqual('{"statusCode":200,"status":"success","data":{"_orderId":"","_broker":"","_payment":"","_description":"","_amount":0,"_created_at":"","_updated_at":""}}');
     });
 
+    it('deve retornar falha em pedidos de pagamento por id', async () => {
+      try {
+        const expectedError = 'failure insert';
+        mockDbConnection.findId.mockRejectedValueOnce(expectedError);
+
+        await PaymentsController.getPaymentsById(BigInt(1), mockDbConnection);
+      } catch (error: any) {
+        expect(error.message).toBe('failure insert');
+      }
+    });
+
     it('deve retornar um exception na consulta por id', async () => {
       mockDbConnection.findId.mockResolvedValueOnce(new Error('error'));
 
@@ -116,6 +127,19 @@ describe('PaymentsController', () => {
       expect(result).toEqual('{"statusCode":200,"status":"success","data":{"_orderId":"","_broker":"","_payment":"","_description":"","_quantity":0,"_amount":0,"_created_at":"","_updated_at":""}}');
     });
 
+    it('deve retornar um exception atualizar um item de pedidos de pagamento por order', async () => {
+      mockDbConnection.update.mockResolvedValueOnce(new Error('error'));
+      mockDbConnection.findId.mockResolvedValueOnce(new Error('error'));
+      const result = await PaymentsController.updatePaymentOrder(
+        '65aae5bc0bae1160640cb836',
+        'APPROVED',
+        'TESTE',
+        mockDbConnection);
+
+      expect(result).toBeDefined();
+      expect(typeof result).toBe('string');
+    });
+
     it('deve retornar um exception atualizar um item de pedidos de pagamento', async () => {
       mockDbConnection.update.mockResolvedValueOnce(new Error('error'));
       mockDbConnection.findId.mockResolvedValueOnce(new Error('error'));
@@ -131,7 +155,6 @@ describe('PaymentsController', () => {
       expect(typeof result).toBe('string');
       expect(result).toEqual('{"statusCode":404,"status":"error","message":{}}');
     });
-
 
     it('deve retornar um exception atualizar um item de pedidos de pagamento 2', async () => {
       mockDbConnection.update.mockResolvedValueOnce(new Error('error'));
