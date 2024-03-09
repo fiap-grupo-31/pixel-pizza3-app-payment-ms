@@ -264,6 +264,7 @@ export class PaymentsController {
     broker: string | null,
     status: string,
     description: string | null,
+    _rabbitMqService: any,
     dbconnection: DbConnection
   ): Promise<string> {
     const paymentsGateway = new PaymentsGateway(dbconnection);
@@ -284,14 +285,13 @@ export class PaymentsController {
         return err;
       });
 
-    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
       id,
       orderId ?? paymentGet._orderId,
       broker ?? paymentGet._broker,
       status,
       description ?? paymentGet._description,
-      orderApiAdapter,
+      _rabbitMqService,
       paymentsGateway
     )
       .then((data) => {
@@ -326,12 +326,14 @@ export class PaymentsController {
 
     const paymentGet = await PaymentsUseCases.getPaymentsByReference(
       {
-        orderId: id
+        where: {
+          orderId: id
+        }
       },
       paymentsGateway
     )
       .then((data) => {
-        return data;
+        return data?.length ? data[0] : {};
       })
       .catch((err) => {
         return err;

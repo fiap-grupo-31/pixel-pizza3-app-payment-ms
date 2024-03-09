@@ -3,6 +3,7 @@ import { Payments } from '../../domain/entities';
 
 describe('PaymentsController', () => {
   let mockDbConnection: any;
+  let _rabbitMqService: any;
 
   beforeEach(() => {
     mockDbConnection = {
@@ -16,6 +17,14 @@ describe('PaymentsController', () => {
         throw new Error('Function not implemented.');
       }
     };
+
+    _rabbitMqService = {
+      _rabbitMqService: {
+        sendMessage: async function (queue: any, data: any) {
+          return true;
+        }
+      }
+    }
   });
 
   describe('Classe PaymentsController', () => {
@@ -149,6 +158,7 @@ describe('PaymentsController', () => {
         'fake',
         'APPROVED',
         '',
+        _rabbitMqService,
         mockDbConnection);
 
       expect(result).toBeDefined();
@@ -165,6 +175,7 @@ describe('PaymentsController', () => {
         'fake',
         'payment.created',
         '',
+        _rabbitMqService,
         mockDbConnection);
 
       expect(result).toBeDefined();
@@ -181,6 +192,7 @@ describe('PaymentsController', () => {
         'fake',
         '',
         '',
+        _rabbitMqService,
         mockDbConnection);
 
       expect(result).toBeDefined();
