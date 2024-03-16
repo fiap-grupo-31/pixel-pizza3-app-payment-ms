@@ -1,15 +1,10 @@
 import {
-  PaymentsGateway,
-  PaymentsMercadoPagoGateway
+  PaymentsGateway
 } from '../../domain/gateways';
 import { OrderApiAdapter } from '../adapters/OrderApiAdapter'
-import { AxiosHttpClient } from '../../infrastructure/external/http/axios-client';
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
-import { QRCodeGeneratorAdapter } from '../../infrastructure/external/qrcode/qrcode';
 import {
-  PaymentsUseCases,
-  PaymentsMercadoPagoUseCases,
-  GenerateQRCodeUseCase
+  PaymentsUseCases
 } from '../../application/usecases';
 import { Global } from '../adapters';
 
@@ -181,65 +176,6 @@ export class PaymentsController {
         return Global.error(err);
       });
 
-    if (broker === 'mercadopago') {
-      const paymentMercadopagoGateway = new PaymentsMercadoPagoGateway(
-        new AxiosHttpClient('')
-      );
-
-      const webhookMeli: string = `${
-        process.env.MELI_WEBHOOK
-          ? `${process.env.MELI_WEBHOOK}/payment/webhook/mercadopago/${paymentId}`
-          : `${dnsPublic}/payment/webhook/mercadopago/${paymentId}`
-      }`;
-      const paymentMercadoPagoObject =
-        await PaymentsMercadoPagoUseCases.createPayment(
-          {
-            external_reference: paymentId,
-            total_amount: 0.01, // order?._amount,
-            items: [
-              {
-                sku_number: 'KS955RUR',
-                category: 'FIAPPOS',
-                title: 'FIAPPOS',
-                description: 'FIAPPOS',
-                quantity: quantity,
-                unit_measure: 'unit',
-                unit_price: amount,
-                total_amount: 0.01 // order?._amount,
-              }
-            ],
-            title: 'Compra simulada FIAP - Tech Chanllenge',
-            description: 'Compra',
-            expiration_date: new Date(new Date().getTime() + 20 * 60 * 1000)
-              .toISOString()
-              .replace('Z', '-03:00'),
-            notification_url: webhookMeli,
-            cash_out: {
-              amount: 0
-            }
-          },
-          paymentMercadopagoGateway
-        )
-          .then((data) => {
-            return data;
-          })
-          .catch((err) => {
-            return Global.error(err);
-          });
-
-      if (!paymentMercadoPagoObject?.qr_data) {
-        return JSON.stringify(Global.error(paymentMercadoPagoObject));
-      }
-
-      paymentObject.mercadopago = paymentMercadoPagoObject;
-
-      const qrcode = new GenerateQRCodeUseCase(new QRCodeGeneratorAdapter());
-      paymentObject.mercadopago.qrcode = await qrcode.execute(
-        paymentMercadoPagoObject?.qr_data
-      );
-      paymentObject.mercadopago.webhook = webhookMeli;
-    }
-
     paymentObject = Global.success(paymentObject);
 
     return JSON.stringify(paymentObject);
@@ -264,6 +200,7 @@ export class PaymentsController {
     broker: string | null,
     status: string,
     description: string | null,
+    _rabbitMqService: any,
     dbconnection: DbConnection
   ): Promise<string> {
     const paymentsGateway = new PaymentsGateway(dbconnection);
@@ -284,14 +221,13 @@ export class PaymentsController {
         return err;
       });
 
-    const orderApiAdapter = new OrderApiAdapter(process.env.API_ORDER_BASEURL ?? '', false);
     const order = await PaymentsUseCases.updatePayment(
       id,
       orderId ?? paymentGet._orderId,
       broker ?? paymentGet._broker,
       status,
       description ?? paymentGet._description,
-      orderApiAdapter,
+      _rabbitMqService,
       paymentsGateway
     )
       .then((data) => {
@@ -326,12 +262,14 @@ export class PaymentsController {
 
     const paymentGet = await PaymentsUseCases.getPaymentsByReference(
       {
-        orderId: id
+        where: {
+          orderId: id
+        }
       },
       paymentsGateway
     )
       .then((data) => {
-        return data;
+        return data?.length ? data[0] : {};
       })
       .catch((err) => {
         return err;

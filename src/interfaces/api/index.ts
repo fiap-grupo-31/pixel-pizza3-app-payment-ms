@@ -1,7 +1,9 @@
 import { PaymentsController } from '../controllers/payments';
+import { PaymentsRabbitmqController } from '../controllers/paymentsRabbitmq';
 
 import { type DbConnection } from '../../domain/interfaces/dbconnection';
 import express, { type Request, type RequestHandler, type Response } from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import { Global } from '../adapters';
@@ -9,19 +11,27 @@ import { swaggerSpec } from '../../infrastructure/swagger/swagger';
 
 export class FastfoodApp {
   private readonly _dbconnection: DbConnection;
+  private readonly _rabbitMqService: any;
   public readonly _app = express();
   private server: any = null;
 
-  constructor (dbconnection: DbConnection) {
+  constructor (dbconnection: DbConnection, rabbitMQService: any) {
     this._dbconnection = dbconnection;
+    this._rabbitMqService = rabbitMQService;
+
+    void PaymentsRabbitmqController.startConsuming(this._dbconnection, this._rabbitMqService);
     this._app = express();
   }
 
   start (): void {
-    this._app.use(bodyParser.json());
+    this._app.use(cors());
+    this._app.use(bodyParser.json({ limit: '10mb' }));
+    this._app.disable('x-powered-by');
     this._app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('Keep-Alive', 'timeout=30');
+      res.setHeader('Content-Security-Policy', "default-src 'self'");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
       if (err instanceof SyntaxError && err.message.includes('JSON')) {
         const errorGlobal: any = Global.error('O body não esta em formato JSON, verifique e tente novamente.', 400);
         return res.status(errorGlobal.statusCode || 404).send(errorGlobal);
@@ -29,7 +39,6 @@ export class FastfoodApp {
         next();
       }
     });
-
     const port = process.env.PORT ?? 8080;
 
     this._app.get('/swagger.json', (req: Request, res: Response) => {
@@ -414,6 +423,7 @@ export class FastfoodApp {
         null,
         status,
         description,
+        this._rabbitMqService,
         this._dbconnection
       );
       res.send(payment);
@@ -491,11 +501,15 @@ export class FastfoodApp {
         null,
         action,
         id,
+        this._rabbitMqService,
         this._dbconnection
       );
       res.send(payment);
     }) as RequestHandler);
 
+    this._app.use((req, res) => {
+      res.status(200).send('');
+    });
     this.server = this._app.listen(port, () => {
     });
     this.server.keepAliveTimeout = 30 * 1000;

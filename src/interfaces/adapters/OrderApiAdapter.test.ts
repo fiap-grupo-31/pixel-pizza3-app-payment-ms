@@ -44,5 +44,17 @@ describe('OrderApiAdapter', () => {
 
       expect(result).toBe(false);
     });
+
+    it('Deve retornar falso em caso de falha na solicitação de atualização', async () => {
+      const orderId = '123';
+      const payment = 'snip';
+
+      mock.onPut(`/orders/${orderId}/payment`).reply(404, {});
+
+      const promise = orderApiAdapter.updatePaymentOrder(orderId, payment);
+      const result = await promise;
+
+      expect(result).toBe(false);
+    });
   });
 });

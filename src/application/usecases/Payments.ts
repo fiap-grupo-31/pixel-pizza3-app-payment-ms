@@ -1,7 +1,6 @@
 /* eslint-disable prefer-promise-reject-errors */
 import { Payments } from '../../domain/entities/Payments';
 import { type PaymentsGatewayInterface } from '../../domain/interfaces/PaymentsGatewayInterface';
-import { type OrderApiAdapter } from '../../interfaces/adapters/OrderApiAdapter';
 
 class PaymentsUseCases {
   static async getPaymentsAll (
@@ -65,7 +64,7 @@ class PaymentsUseCases {
     broker: string,
     payment: string,
     description: string,
-    orderApiAdapter: OrderApiAdapter,
+    _rabbitMqService: any,
     paymentsGateway: PaymentsGatewayInterface
   ): Promise<Payments | null> {
     const entity = new Payments(
@@ -79,6 +78,7 @@ class PaymentsUseCases {
       null,
       null
     );
+
     if (!entity.paymentCheck) {
       throw new Error('payment inválid');
     }
@@ -93,7 +93,17 @@ class PaymentsUseCases {
       );
       const payments: any = await paymentsGateway.findId(id);
 
-      await orderApiAdapter.updatePaymentOrder(payments?.orderId, payment)
+      try {
+        if (['WAITING', 'APPROVED', 'DENIED'].includes(payment)) {
+          const msg = await _rabbitMqService.sendMessage('orders', {
+            event: 'aceptedOrder',
+            orderId,
+            status: payment,
+            message: ''
+          })
+        }
+      } catch (error) {
+      }
 
       return new Payments(
         payments?.id,
