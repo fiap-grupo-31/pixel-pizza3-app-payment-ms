@@ -101,7 +101,6 @@ class PaymentsUseCases {
             status: payment,
             message: ''
           })
-          console.log(msg)
         }
       } catch (error) {
       }

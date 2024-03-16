@@ -7,7 +7,6 @@ export class PaymentsRabbitmqController {
     try {
       _rabbitMqService.consume('payments', (message: any) => {
         const fn: any = this
-        console.log(message)
         if (typeof fn[message.event] !== 'undefined') {
           fn[message.event](message, _dbconnection, _rabbitMqService);
         }
@@ -49,8 +48,7 @@ export class PaymentsRabbitmqController {
   }
 
   static async rejectPayment (data: any, _dbconnection: DbConnection): Promise<any> {
-    console.log(data)
-    await PaymentsController.updatePaymentOrder(
+    return await PaymentsController.updatePaymentOrder(
       data?.orderId,
       'CANCELED',
       '',

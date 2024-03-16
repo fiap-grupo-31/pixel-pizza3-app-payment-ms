@@ -239,7 +239,7 @@ describe('PaymentsController', () => {
 
       expect(result).toBeDefined();
       expect(typeof result).toBe('string');
-      expect(result).toEqual('{"statusCode":404,"status":"error","message":{"statusCode":404,"status":"error","message":{}}}');
+      expect(result).toEqual('{"statusCode":200,"status":"success","data":{"statusCode":404,"status":"error","message":{}}}');
     });
 
     it('deve retornar um exception ao tentar inserir um novo item de pedidos de pagamento com broker invalido', async () => {

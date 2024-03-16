@@ -17,14 +17,9 @@ export class OrderApiAdapter implements OrderApiAdapterInterface {
 
   async updatePaymentOrder (orderId: string, payment: string): Promise<boolean> {
     try {
-      const response: AxiosResponse = await this.axiosInstance.put(`/orders/${orderId}/payment`, {
+      await this.axiosInstance.put(`/orders/${orderId}/payment`, {
         payment
       });
-
-      if (response.status !== 200) {
-        return false;
-      }
-
       return true;
     } catch (error) {
       return false;
